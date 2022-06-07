@@ -5,6 +5,66 @@ select * from Person.Person ;
 select * from Person.Address ;
 select * from Sales.SalesOrderDetail ;
 
+-----------------------------------------------------------------------------------------------------------------------------
+
+-- Tipos de Dados --
+
+--1.Booleanos
+--Por padrão ele é inicializado como null, e pode receber 1 ou 0.
+--Tipo : BIT
+
+--2.Caractéres
+--Tamanho fixo - CHAR // Permite inserir uma quantidade fixa de caracters e sempre o cupa todo espaço reservado 10/50
+--Tamanhos variáveis - VARCHAR ou NVARCHAR //Permite inserir até uma quantidade que for definida, porem só usa o espaço que for preenchido
+
+--3.Números
+--## Valores exatos
+-- TINYINT  - Não tem valor fracionado (ex: 1.42, 25.65) somente inteiro 1, 123, 456789 ....
+-- SMALLINT - Mesma coisa porem limite maior.
+-- INT      - Mesma coisa porem limite maior.
+-- BIGINT   - Mesma coisa porem limite maior.
+-- NUMERIC ou DECIMAL - calores exatos, porem permite ter partes fracionados, que também pode ser especificado a precisão 
+--e escala (escala é o número de digitos na parte fracional) Ex: NUMERIC(5,2) 133,42 total de 5 digitos e 2 dpois da virgula.
+
+--## Valores Aproximados
+-- REAL  - Tem precisão aprocimada de até 15 digitos, depois da virgula Ex: 12,...
+-- FLOAT - Mesmo conceito do REAL.
+
+--4.Temporais
+-- DATE - Armazena Data no formato aaa/mm/dd
+-- DATATIME - Armazena Data e Hora no formato aaaa/mm/dd:hh:mm:ss
+-- DATATIME2 - Data e Hora com edição de milesegundos no formato aaaa/mm/dd:hh:mm:sssssss
+-- SMALLDATETIME - Data e Hora respeitando o limite entre '1900-01-01:00:00:00' até '2079-06-06:23:59:59'
+-- TIME - Horas, Minutos, Segundos e Milesegundos respeitando o limite de '00:00:0000000' até '23:59:59.9999999'
+-- DATETIMEOFFSET - Permite armazenar informações da Data e Hora incluindo o fuso horário
+
+-------------------------------------------------------------------------------------------------------------------------------
+
+-- Chave Primária
+
+* Chave Primária é basicámente uma coluna ou grupo de colunas, usada para indentificar unicamente uma linha em uma tabela.
+* Voçe consegue criar essas chaves através de restrições (ou constraints em inglês), que são regras que voçe define quando está criando uma coluna
+* Assim quando voçe faz isso está criando um indice único para aquela coluna ou grupo de colunas.
+
+	CREATE TABLE nome_tabela (
+		nomeColuna tipoDeDados PRIMARY KEY
+		nomeColuna tipoDeDados ...
+	)
+
+
+-- Chave Estrangeira
+
+* Uma chave estrangeira é uma coluna ou grupo de colunas em uma tabela que indentifica unicamente uma linha em outra tabela.
+* Ou seja, uma chave estrangeira é definida em uma tabelaonde ela é apenas uma referência e não contem todos os dados ali.
+* Tabela que contem uma chave estrangeira é chamada de referênciadora ou tabela Filho. 
+E a tabela na qual a chave é referenciada é chamada de tabela Pai.
+*Uma tabela pode ter mais de uma chave estrangeira dependendo do total de relacionamentos com as outras tabelas.
+
+-- No SQL Server
+* Voçe define uma chave estrageira atraves de um "Foreygn Key Constraint" ou restrição de chave estrangeira.
+* Uma restrição de chave estrangeira indica que os valores em uma coluna ou grupo de colunas na tabela filho corresponde a os valores da tabela pai.
+* Nós podemos entender que uma chave estrangeira mantem a "integridade referencial".
+
 -------------------------------------------------------------------------------------------------------------------------------
 
 SELECT COUNT(*)
@@ -391,8 +451,10 @@ select * from Person.Address;
 select * from Person.StateProvince;
 
 ------------------------------------------------------------------------------------------------------------------------
+(NO BD Northwind)
 
----------------------------- NO BD Northwind ---------------------------
+--Self Join (é uma forma de agrupar/ordenar dados dentro de uma mesma tabela)
+
 --Quero todos os clientes que moram na mesma região
 select A.ContactName, A.Region, B.ContactName, B.Region
 from Customers A, Customers B
@@ -415,7 +477,6 @@ where A.Discount = B.Discount
 select * from [Order Details]
 
 ---------------------------------------------------------------------------------------------------------------------------------
---Self Join (é uma forma de agrupar/ordenar dados dentro de uma mesma tabela)
 
 SELECT A.ContactName, A.Region, B.ContactName, B.Region
 FROM Customers A, Customers B  
@@ -430,10 +491,6 @@ WHERE DATEPART(year, A.HireDate) = DATEPART(year, B.HireDate);
 SELECT A.Discount, A.ProductID, B.Discount, B.ProductID
 FROM [Order Details] A, [Order Details] B
 WHERE A.Discount = B.Discount;
-
----------------------------------------------------------------------------------------------------------------------------------
---Tipos de Dados
-
 
 ---------------------------------------------------------------------------------------------------------------------------------
 (BD Trescamadas -> registers)
