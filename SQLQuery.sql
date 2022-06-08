@@ -66,6 +66,65 @@ E a tabela na qual a chave é referenciada é chamada de tabela Pai.
 * Nós podemos entender que uma chave estrangeira mantem a "integridade referencial".
 
 -------------------------------------------------------------------------------------------------------------------------------
+--CREATE DATABASE
+
+USE master;  
+GO  
+CREATE DATABASE Youtube 
+ON   
+( NAME = Canais,  
+    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQL\DATA\youtube.mdf',  
+    SIZE = 10,  
+    MAXSIZE = 50,  
+    FILEGROWTH = 5 )  
+LOG ON  
+( NAME = Canai,  
+    FILENAME = 'C:\Program Files\Microsoft SQL Server\MSSQL14.SQLEXPRESS\MSSQL\DATA\youtube.ldf',  
+    SIZE = 5MB,  
+    MAXSIZE = 25MB,  
+    FILEGROWTH = 5MB );  
+GO  
+
+-------------------------------------------------------------------------------------------------------------------------------
+-- CREATE TABLE --
+
+EX:
+	CREATE TABLE nomeTabela(
+		coluna1 tipo restriçãoDaColuna,
+		coluna2 tipo restriçãoDaColuna,
+		coluna3 tipo restriçãoDaColuna,
+	);
+
+--Principais tipos de restrições que podem ser aplicadas
+NOT NULL    - Não permite nulos.
+UNIQUE      - Força que todos os valores em uma coluna sejam diferentes.
+PRIMARY KEY - Uma junção do NOT NULL e UNIQUE.
+FOREIGN KEY - Identifica unicamente uma linha em outra tabela.
+CHECK       - Força uma condição especifica em uma coluna.
+DEFAULT     - Força um valor padrão quando nenhum valor é passado.
+
+--Criando tabela Canal
+CREATE TABLE Canal (
+	CanalId           INT          PRIMARY KEY,
+	Nome              VARCHAR(150) NOT NULL,
+	ContagemInscritos INT          DEFAULT 0,
+	DataCriacao       DATETIME     NOT NULL
+);
+
+SELECT * FROM Canal;
+
+CREATE TABLE Video (
+	VideoId       INT          PRIMARY KEY,
+	Nome          VARCHAR(150) NOT NULL,
+	Visualizacoes INT          DEFAULT 0,
+	Likes         INT          DEFAULT 0,
+	Dislikes      INT          DEFAULT 0,
+	Duracao       INT          NOT NULL,
+	CanalID       INT          FOREIGN KEY REFERENCES Canal(CanalId)
+);
+
+SELECT * FROM Video;
+-------------------------------------------------------------------------------------------------------------------------------
 
 SELECT COUNT(*)
 FROM Production.Product
