@@ -666,3 +666,13 @@ SELECT * FROM registers WHERE password = '19898@Li'
 SELECT * FROM registers WHERE password COLLATE Latin1_General_CS_AS = '19898@li'
 
 --------------------------------------------------------------------------------------------------------------------------
+
+--A função CONCAT() adiciona duas ou mais strings juntas.
+
+SELECT CONCAT('String1', ' ','String2');
+
+SELECT CONCAT( registers.username, ' ', registers.password) 
+FROM registers
+LEFT JOIN items on items.iduser = registers.id;
+
+--------------------------------------------------------------------------------------------------------------------------
