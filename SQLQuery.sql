@@ -65,6 +65,11 @@ E a tabela na qual a chave é referenciada é chamada de tabela Pai.
 * Uma restrição de chave estrangeira indica que os valores em uma coluna ou grupo de colunas na tabela filho corresponde a os valores da tabela pai.
 * Nós podemos entender que uma chave estrangeira mantem a "integridade referencial".
 
+
+-- Definindo uma chave estrangeira em uma TB.
+ALTER TABLE TB_VENDEDORES ADD CONSTRAINT PK_TB_VENDEDORES PRIMARY KEY (MATRICULA);
+
+
 -------------------------------------------------------------------------------------------------------------------------------
 --CREATE DATABASE
 
@@ -124,6 +129,25 @@ CREATE TABLE Video (
 );
 
 SELECT * FROM Video;
+-------------------------------------------------------------------------------------------------------------------------------
+-- UPDATE --
+
+UPDATE TB_PRODUTOS SET NOME = 'Clean - 350 ml - Laranja', TAMANHO = '350 ml', PRECO_LISTA = 5.50 WHERE PRODUTO = '1037797';
+
+-------------------------------------------------------------------------------------------------------------------------------
+-- DELETE --
+DELETE FROM TB_VENDEDORES WHERE MATRICULA = '00400';
+
+-------------------------------------------------------------------------------------------------------------------------------
+-- DATE --
+
+--Inserindo
+INSERT INTO TB_CLIENTES 
+(CPF, NOME, ENDERECO1, ENDERECO2, BAIRRO, CIDADE, ESTADO, CEP, DATA_NASCIMENTO, IDADE, SEXO, LIMITE_CREDITO, VOLUME_COMPRA, PRIMEIRA_COMPRA)
+VALUES
+('00333434577', 'João da Silva', 'Rua Projetada número 10', NULL, 'VILA ROMAN', 'TRÊS RIOS', 'RJ', '22222222', TO_DATE('12/10/1965', 'DD/MM/YYYY'), 56, 'M', 100000, 2000, 0);
+
+
 -------------------------------------------------------------------------------------------------------------------------------
 
 SELECT COUNT(*)
@@ -671,7 +695,10 @@ SELECT * FROM registers WHERE password COLLATE Latin1_General_CS_AS = '19898@li'
 
 SELECT CONCAT('String1', ' ','String2');
 
-SELECT CONCAT( registers.username, ' ', registers.password) 
+SELECT registers.id,
+CONCAT( registers.username, ' ', registers.password) AS "nome_senha",
+items.name As "Name_Item",
+items.type AS "type"
 FROM registers
 LEFT JOIN items on items.iduser = registers.id;
 
