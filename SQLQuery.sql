@@ -147,7 +147,16 @@ INSERT INTO TB_CLIENTES
 VALUES
 ('00333434577', 'João da Silva', 'Rua Projetada número 10', NULL, 'VILA ROMAN', 'TRÊS RIOS', 'RJ', '22222222', TO_DATE('12/10/1965', 'DD/MM/YYYY'), 56, 'M', 100000, 2000, 0);
 
+--Buscando 
+SELECT * FROM TB_CLIENTES WHERE DATA_NASCIMENTO = '25/03/92';
 
+SELECT * FROM TB_CLIENTES WHERE DATA_NASCIMENTO = TO_DATE('25/03/1992', 'DD/MM/YYYY');
+
+SELECT * FROM TB_CLIENTES WHERE DATA_NASCIMENTO = TO_DATE('03/25/1992', 'MM/DD/YYYY');
+
+SELECT * FROM TB_CLIENTES WHERE DATA_NASCIMENTO > TO_DATE('03/25/1992', 'MM/DD/YYYY');
+
+SELECT * FROM TB_CLIENTES WHERE TO_CHAR(DATA_NASCIMENTO, 'MM') = 9; --Pegar apenas mês de setembro
 -------------------------------------------------------------------------------------------------------------------------------
 
 SELECT COUNT(*)
