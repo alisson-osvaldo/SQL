@@ -158,7 +158,16 @@ SELECT * FROM TB_CLIENTES WHERE DATA_NASCIMENTO > TO_DATE('03/25/1992', 'MM/DD/Y
 
 SELECT * FROM TB_CLIENTES WHERE TO_CHAR(DATA_NASCIMENTO, 'MM') = 9; --Pegar apenas mês de setembro
 -------------------------------------------------------------------------------------------------------------------------------
+-- Filtros compostos --
 
+-- Selecionar cliente com idade maior ou igual a 18 do sexo femenino e que seja de São Paulo ou do Bairro 'Barra da Tijuca':
+SELECT * FROM TB_CLIENTES WHERE (IDADE >= 18 AND SEXO = 'F') 
+AND (CIDADE = 'Sao Paulo' OR BAIRRO = 'Barra da Tijuca');
+
+SELECT * FROM TB_CLIENTES WHERE (IDADE >= 18 AND SEXO = 'F' 
+AND CIDADE = 'Sao Paulo') OR BAIRRO = 'Barra da Tijuca';
+
+-------------------------------------------------------------------------------------------------------------------------------
 SELECT COUNT(*)
 FROM Production.Product
 
