@@ -192,10 +192,39 @@ end) as CLASSIFICACAO
 from tabela_de_clientes;
 
 
+-- INNER JOIN -----------------------------------------------------------------------------
+
+--Juntando a tabela de notas com a de vendedor, para saber a qtd. de vendas:
+SELECT
+    nf.matricula,
+    v.nome,
+    COUNT(*) numero_de_notas
+FROM
+         notas_fiscais nf
+    INNER JOIN tabela_de_vendedores v ON nf.matricula = v.matricula
+GROUP BY
+    nf.matricula,
+    v.nome;
 
 
+-- Na atividade onde pretendíamos obter os produtos que venderam mais que 394000 litros, executamos esta consulta:
+SELECT
+    inf.codigo_do_produto,
+    tb.nome_do_produto,
+    SUM(inf.quantidade)
+FROM
+         itens_notas_fiscais inf
+    INNER JOIN tabela_de_produtos tb ON inf.codigo_do_produto = tb.codigo_do_produto
+GROUP BY
+    inf.codigo_do_produto,
+    tb.nome_do_produto
+HAVING
+    SUM(inf.quantidade) >= 394000
+ORDER BY
+    SUM(inf.quantidade) DESC;
+    
 
-
+--
 
 
 
