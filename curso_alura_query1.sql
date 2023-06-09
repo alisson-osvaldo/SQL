@@ -193,6 +193,10 @@ from tabela_de_clientes;
 
 
 -- INNER JOIN -----------------------------------------------------------------------------
+/*
+ Só faz junção se existir conjunto nas duas tabelas, ex: tabela_1 chave_primaria 05 na tabela_2 cheve_estranjeira 05, 
+ casso não tenha um conjunto não traz nada.
+*/
 
 --Juntando a tabela de notas com a de vendedor, para saber a qtd. de vendas:
 SELECT
@@ -224,7 +228,100 @@ ORDER BY
     SUM(inf.quantidade) DESC;
     
 
---
+-- LEFT JOIN -----------------------------------------------------------------------------
+/*
+ Traz todos da tabela da esquerda e somente quem tem indentificação, cojunto da tabela da direita. 
+*/
+ select te.nome, td.matricula
+ from tabela_esquerda te
+ left join
+ tabela_direita td
+ on te.identificador = td.identificador;
+
+
+
+
+-- RIGHT JOIN -----------------------------------------------------------------------------
+/*
+ Traz todos da tabela da direita e somente quem tem indentificação, cojunto da tabela da esquerda. 
+*/
+ select te.nome, td.matricula
+ from tabela_esquerda te
+ right join
+ tabela_direita td
+ on te.identificador = td.identificador;
+
+
+
+
+
+-- FULL JOIN -----------------------------------------------------------------------------
+/*
+ Traz todos, combinação do que tem em comum e do que não tem.
+*/
+ select te.nome, td.matricula
+ from tabela_esquerda te
+ full join
+ tabela_direita td
+ on te.identificador = td.identificador;
+
+
+
+-- CROSS JOIN -----------------------------------------------------------------------------
+/*
+ Faz uma analise combinatória de todos da esquerda com todos que tenho na direita.
+ EX: 
+ tabela_1 
+ nome   Identificador
+ Maria   01
+ João    02
+ 
+ tabela-2
+ Identificador  Hobby
+ 01             Futebol
+ 02             Fotografia
+ 
+ RESULTADO DO CROSS JOIN:
+ nome   Hobby
+ João   Futebol
+ João   Fotografia
+ Maria  Futebol
+ Maria  Fotografia
+
+*/
+SELECT te.nome, td.hobby
+FROM tabela_esquerda te,
+tabela_direita td;
+
+
+-- UNION -----------------------------------------------------------------------------
+/*
+ Une o resultado de duas consultas.
+ 
+ Requisito: O resultado das duas consultas devem trazer o mesmo númeor de campos e 
+            corresponderem ao mesmo tipo.
+            
+ - Elimina os repetidos, para não eliminar utilizar o UNION ALL.
+*/
+
+SELECT DISTINCT BAIRRO, 'CLIENTE' AS ORIGEM FROM TABELA_DE_CLIENTES
+UNION ALL
+SELECT DISTINCT BAIRRO, 'FORNECEDOR' AS ORIGEM FROM TABELA_DE_VENDEDORES;
+
+
+-- Subconsultas no comando IN -----------------------------------------------------------------------------
+
+select * from tabela_de_clientes where bairro in 
+(select distinct bairro from tabela_de_clientes);
+
+
+
+
+
+
+
+
+
 
 
 
