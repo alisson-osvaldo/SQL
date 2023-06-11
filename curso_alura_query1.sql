@@ -315,10 +315,243 @@ select * from tabela_de_clientes where bairro in
 (select distinct bairro from tabela_de_clientes);
 
 
+-- Subconsultas substituindo o HAVING -----------------------------------------------------------------------------
+
+-- 1.agrupando por embalagens
+select embalagem, sum(preco_de_lista) as soma_preco
+from tabela_de_produtos group by embalagem;
+
+-- 2.Utilizando HAVING
+select embalagem, sum(preco_de_lista) as soma_preco
+from tabela_de_produtos group by embalagem
+having sum(preco_de_lista)>= 80;
+
+-- 2.Utilizando subconsulta
+SELECT
+    soma_embalagens.embalagem,
+    soma_embalagens.soma_preco
+FROM
+    (
+        SELECT
+            embalagem,
+            SUM(preco_de_lista) AS soma_preco
+        FROM
+            tabela_de_produtos
+        GROUP BY
+            embalagem
+    ) soma_embalagens
+WHERE
+    soma_embalagens.soma_preco >= 80;
 
 
 
+-- Exercício Redesenhe esta consulta usando subconsultas :
+SELECT INF.CODIGO_DO_PRODUTO, TP.NOME_DO_PRODUTO, SUM(INF.QUANTIDADE) FROM ITENS_NOTAS_FISCAIS INF
+INNER JOIN TABELA_DE_PRODUTOS TP 
+ON INF.CODIGO_DO_PRODUTO = TP.CODIGO_DO_PRODUTO
+GROUP BY INF.CODIGO_DO_PRODUTO, TP.NOME_DO_PRODUTO HAVING SUM(INF.QUANTIDADE) > 394000 
+ORDER BY SUM(INF.QUANTIDADE) DESC;
 
+--RESULTADO:
+SELECT
+    sc.codigo_do_produto,
+    sc.nome_do_produto,
+    sc.quantidade_total
+FROM
+    (
+        SELECT
+            inf.codigo_do_produto,
+            tp.nome_do_produto,
+            SUM(inf.quantidade) AS quantidade_total
+        FROM
+                 itens_notas_fiscais inf
+            INNER JOIN tabela_de_produtos tp ON inf.codigo_do_produto = tp.codigo_do_produto
+        GROUP BY
+            inf.codigo_do_produto,
+            tp.nome_do_produto
+    ) sc
+WHERE
+    sc.quantidade_total > 394000
+ORDER BY
+    sc.quantidade_total DESC;
+
+
+-- Views -----------------------------------------------------------------------------
+/*
+ Permite a criação de uma tabela virtual,Essas tabelas, na verdade, não existem, mas se comportam como tais.
+ É uma tabela lógica, resultado de uma consulta, que pode ser usada depois em qualquer outra consulta.
+ O resultado é o mesmo, seja aplicando subconsultas ou HAVING. A diferença é que essa view fica salva no banco de dados como se fosse uma tabela e ela é muito dinâmica. 
+ Dessa forma, conforme a tabela de clientes vai sendo atualizada, ela retorna resultados diferentes.
+ primeiro é feito a consulta da tabela original para criar a view e só depois disso que é realizada a seleção final. Porém, a view funciona como se fosse um relatório,
+ ou seja, podemos construir grandes SQLs, salvá-las como views e possibilitar que usuário possa acessá-la por meio de uma consulta simples, afinal, já estamos fazendo cálculos complexos internamente.
+*/
+
+
+-- Criando uma VIEW
+CREATE VIEW vw_soma_embalagens AS 
+SELECT embalagem, SUM(preco_de_lista) AS soma_preco
+FROM tabela_de_produtos GROUP BY embalagem;
+
+-- Select na VIEW
+SELECT * FROM VW_SOMA_EMBALAGENS;
+
+SELECT embalagem, soma_preco FROM VW_SOMA_EMBALAGENS
+WHERE soma_preco >= 80;
+
+SELECT * FROM tabela_de_produtos tp
+INNER JOIN vw_soma_embalagens vw
+ON tp.embalagem = vw.embalagem 
+WHERE vw.soma_preco >= 80;
+
+
+
+--Exercício: Redesenhe esta consulta, criando uma view para a lista de quantidades totais por produto e aplicando a condição e ordenação sobre essa mesma visão.
+SELECT
+    inf.codigo_do_produto,
+    tp.nome_do_produto,
+    SUM(inf.quantidade) 
+FROM
+         itens_notas_fiscais inf
+    INNER JOIN tabela_de_produtos tp ON inf.codigo_do_produto = tp.codigo_do_produto
+GROUP BY
+    inf.codigo_do_produto,
+    tp.nome_do_produto
+HAVING
+    SUM(inf.quantidade) > 394000
+ORDER BY
+    SUM(inf.quantidade) DESC;
+
+--RESULTADO:
+CREATE VIEW vw_quantidade_total_de_produtos AS
+SELECT
+    inf.codigo_do_produto,
+    tp.nome_do_produto,
+    SUM(inf.quantidade) AS quantidade_total
+FROM
+         itens_notas_fiscais inf
+    INNER JOIN tabela_de_produtos tp ON inf.codigo_do_produto = tp.codigo_do_produto
+GROUP BY
+    inf.codigo_do_produto,
+    tp.nome_do_produto
+HAVING
+    SUM(inf.quantidade) > 394000
+ORDER BY
+    SUM(inf.quantidade) DESC;
+
+
+-- FUNCTIONS -----------------------------------------------------------------------------
+-- FUNCTION STRING:
+-- LOWER - Tudo em minusculo:
+    select nome, LOWER(nome) from tabela_de_clientes;
+
+-- UPPER - Tudo em maiusculo:
+    select nome, UPPER(nome) from tabela_de_clientes;
+
+-- INITCAP - Deixa a primeira letra de cada palavra em Maiusculo
+    select nome_do_produto, INITCAP(nome_do_produto) from tabela_de_produtos;
+
+-- CONCAT - Junta duas colunas em uma (aceita apenas 2 aparâmetros): 
+    select endereco_1, bairro, CONCAT(CONCAT(endereco_1, ' '), bairro) from tabela_de_clientes;
+-- Também pode ser usado || para representar CONCAT:
+    SELECT ENDERECO_1 || ' ' || BAIRRO || ' ' || CIDADE || ' ' || ESTADO || ' - ' || CEP RESULTADO_DA_CONCATENACAO FROM TABELA_DE_CLIENTES;
+
+-- LPAD - Completa uma determinada quantidade de caractéres, começando pelo lado esquerdo:
+    SELECT NOME_DO_PRODUTO, LPAD(NOME_DO_PRODUTO,70,'*') FROM TABELA_DE_PRODUTOS;
+
+-- RPAD - Completa uma determinada quantidade de caractéres, começando pelo lado Direito:
+    SELECT NOME_DO_PRODUTO, RPAD(NOME_DO_PRODUTO,70,'*') FROM TABELA_DE_PRODUTOS;
+    
+-- SUBSTR - Pega uma parte do texto de dentro do texto original:
+ select nome_do_produto, SUBSTR(nome_do_produto, 3, 5) from tabela_de_produtos;
+
+-- INSTR - Mostra a posição da string onde está a palavrva ou caracter em que estamos buscando:
+    select nome, INSTR(nome, 'Mattos') from tabela_de_clientes;
+
+-- LTRIM, RTRIM, TRIM - Removem os espaços:
+    select '   OSVALDO   ' X, LTRIM('   OSVALDO   ') Y, RTRIM('   OSVALDO   ') Z, TRIM('   OSVALDO   ') W FROM DUAL;
+
+-- REPLACE - Faz a substituição de caractéres: 
+    -- Utlilizamos aqui dois RAPLACES por que tinha a palavra 'Litro' e 'Litros' então sobrava o 's' ficando 'Ls' o segundo REPLACE substitui o 'LS' por 'L'.
+    select nome_do_produto, REPLACE(REPLACE(nome_do_produto, 'Litro', 'L'), 'Ls', 'L') from tabela_de_produtos;
+
+
+-- DATE -----------------------------------------------------------------------------
+-- Data do computador
+    select sysdate from dual;
+
+-- Mostrar data+hora do cumputador
+    select to_char(sysdate, 'DD/MM/YYYY HH:MI:SS') from dual;
+
+-- Visualizando data em outro formato:
+    select nome, to_char(data_de_nascimento, 'DD MONTH YYYY, DAY') from tabela_de_clientes;
+
+-- Verificando data daqui a 127 dias apartir do dia da busca:
+    select sysdate + 127 from dual;
+
+-- Descobrindo idade apartir da data de nascimento:
+    select nome, (sysdate - data_de_nascimento)/365 from tabela_de_clientes;
+
+-- MONTHS_BETWEEN retorna número de meses entre as datas:
+    select MONTHS_BETWEEN(SYSDATE, data_de_nascimento)/12 from tabela_de_clientes;
+
+-- ADD_MONTHS o dia de hoje adicionado + 10 meses, Bom para calcular o vencimento de uma fatura:
+    select ADD_MONTHS(SYSDATE, 10) from dual; 
+    
+-- NEX_DAY Mostra quando é o próximo dia:
+    select sysdate, NEXT_DAY(sysdate, 'SEXTA') from dual;
+  
+-- LAST_DAY Mostra qual é o ultimo dia do mês em que estamos:
+    select sysdate, LAST_DAY(sysdate) from dual;
+
+
+-- Funções Númericas -----------------------------------------------------------------------------
+-- ROUND Faz o arredondoamento de valores decimais:
+    select ROUND(3.4) from dual;
+    select ROUND(3.5) from dual;
+    select ROUND(3.6) from dual;
+
+-- TRUNC Arredando para baixo
+    select TRUNC(3.4) from dual;
+    select TRUNC(3.5) from dual;
+    select TRUNC(3.6) from dual;
+
+-- CEIL Arredondo para cima
+    select CEIL(3.4) from dual;
+    select CEIL(3.5) from dual;
+    select CEIL(3.6) from dual;
+
+-- FLOOR 
+    select FLOOR(3.4) from dual;
+    select FLOOR(3.5) from dual;
+    select FLOOR(3.6) from dual;
+
+-- POWER 10 elevado a 4 = 10.000:
+    select POWER(2, 4) from dual;
+
+-- EXP eleva um número exponencial
+    select EXP(4) from dual;
+
+-- SQRT Raiz Quadrada 
+    select SQRT(10) from dual;
+
+-- ABS Valor absoluto
+
+-- MOd pega o resto de uma divisão
+    select MOD(10, 6) from dual;
+
+/*
+Na tabela de notas fiscais, temos o valor do imposto. Já na tabela de itens, 
+temos a quantidade e o faturamento. Calcule o valor do imposto pago no ano de 2016, 
+arredondando para o menor inteiro.
+*/
+SELECT TO_CHAR(DATA_VENDA, 'YYYY'), FLOOR(SUM(IMPOSTO * (QUANTIDADE * PRECO))) 
+FROM NOTAS_FISCAIS NF
+INNER JOIN ITENS_NOTAS_FISCAIS INF ON NF.NUMERO = INF.NUMERO
+WHERE TO_CHAR(DATA_VENDA, 'YYYY') = 2016
+GROUP BY TO_CHAR(DATA_VENDA, 'YYYY');
+
+
+-- Funções de Conversões -----------------------------------------------------------------------------
 
 
 
