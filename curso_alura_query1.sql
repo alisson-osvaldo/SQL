@@ -552,6 +552,187 @@ GROUP BY TO_CHAR(DATA_VENDA, 'YYYY');
 
 
 -- Funções de Conversões -----------------------------------------------------------------------------
+-- 1. Consulta agrupando por mês e somando as quantidades de NFs emitidas por mês pelo usuário:
+SELECT
+    nf.cpf,
+    to_char(nf.data_venda, 'MM-YYYY') AS mes_ano,
+    SUM(inf.quantidade)               AS quantidade_total
+FROM
+         notas_fiscais nf
+    INNER JOIN itens_notas_fiscais inf ON nf.numero = inf.numero
+GROUP BY
+    cpf,
+    to_char(nf.data_venda, 'MM-YYYY');
+
+-- 2. Consulta volume de compra por CPF:
+    select cpf, nome, volume_de_compra from tabela_de_clientes;
+
+-- 3. Juntando as tabelas pela data e descobrind o tatoal de vendas no mês por CPF:
+/*Em janeiro de 2015, o volume de compra que Gabriel Araújo poderia negociar era 21.000, mas ele negociou 23.106 - ultrapassando o valor limite. Já em fevereiro de 2015, ele negociou 18.645, dentro do seu volume de compra.
+Ou seja: em fevereiro de 2015, as vendas para Gabriel Araújo foram válidas; em janeiro, foram inválidas.
+Então, podemos fazer um teste para verificar se as compras foram ou não válidas.
+*/
+SELECT
+    tc.cpf,
+    tc.nome,
+    tc.volume_de_compra,
+    tv.mes_ano,
+    tv.quantidade_total
+FROM
+         tabela_de_clientes tc
+    INNER JOIN (
+        SELECT
+            nf.cpf,
+            to_char(nf.data_venda, 'MM-YYYY') AS mes_ano,
+            SUM(inf.quantidade)               AS quantidade_total
+        FROM
+                 notas_fiscais nf
+            INNER JOIN itens_notas_fiscais inf ON nf.numero = inf.numero
+        GROUP BY
+            cpf,
+            to_char(nf.data_venda, 'MM-YYYY')
+    ) tv ON tv.cpf = tc.cpf;
+
+-- 4. Teste para saber se a quantidaded emitida é valido ou não (quantidade_total deve ser menor que volume_de_compra):
+SELECT
+    tc.cpf,
+    tc.nome,
+    tc.volume_de_compra,
+    tv.mes_ano,
+    tv.quantidade_total,
+    (CASE WHEN tc.volume_de_compra >= tv.quantidade_total THEN 'VENDAS VÁLIDAS' ELSE 'VENDAS INVÁLIDAS' END) AS RESULTADO
+FROM
+         tabela_de_clientes tc
+    INNER JOIN (
+        SELECT
+            nf.cpf,
+            to_char(nf.data_venda, 'MM-YYYY') AS mes_ano,
+            SUM(inf.quantidade)               AS quantidade_total
+        FROM
+                 notas_fiscais nf
+            INNER JOIN itens_notas_fiscais inf ON nf.numero = inf.numero
+        GROUP BY
+            cpf,
+            to_char(nf.data_venda, 'MM-YYYY')
+    ) tv ON tv.cpf = tc.cpf
+    WHERE tv.mes_ano = '02-2015';
+
+
+
+
+select * from notas_fiscais;
+select * from itens_notas_fiscais;
+
+
+--EXERCÍCIO:
+/*
+Nesta aula, construímos um relatório que apresentou os clientes que tiveram vendas inválidas. 
+Complemente este relatório, listando somente os que tiveram vendas inválidas e calculando a diferença entre o limite de venda máximo e o realizado, em percentuais. Dica:
+ - Capture a SQL final da aula;
+ - Filtre somente as linhas onde:
+    (VOLUME_DE_COMPRA - QUANTIDADE_VENDAS) < 0
+    
+ - Liste a coluna VOLUME_DE_COMPRA;
+ - Crie uma nova coluna, fazendo a fórmula:
+    (1 - (VOLUME_DE_COMPRA/QUANTIDADE_VENDAS)) * 100
+    
+*/
+-- 1. Vamos fazer um filtro especial para somente os que tiveram seus limites estourados:
+SELECT
+    tc.cpf,
+    tc.nome,
+    tc.volume_de_compra,
+    tv.mes_ano,
+    tv.quantidade_total,
+    (
+        CASE
+            WHEN tc.volume_de_compra >= tv.quantidade_total THEN
+                'VENDAS VÁLIDAS'
+            ELSE
+                'VENDAS INVÁLIDAS'
+        END
+    ) AS resultado,
+    round((1 -(tc.volume_de_compra / tv.quantidade_total)) * 100, 2)
+FROM
+         tabela_de_clientes tc
+    INNER JOIN (
+        SELECT
+            nf.cpf,
+            to_char(nf.data_venda, 'MM-YYYY') AS mes_ano,
+            SUM(inf.quantidade)               AS quantidade_total
+        FROM
+                 notas_fiscais nf
+            INNER JOIN itens_notas_fiscais inf ON nf.numero = inf.numero
+        GROUP BY
+            cpf,
+            to_char(nf.data_venda, 'MM-YYYY')
+    ) tv ON tv.cpf = tc.cpf
+WHERE
+        tv.mes_ano = '02-2015'
+    AND ( tc.volume_de_compra - tv.quantidade_total ) < 0
+
+
+/* EXERCÍCIO
+Vamos para mais um desafio. Nosso usuário pediu o seguinte relatório:
+
+    - Ranking das vendas de produtos por sabor, dentro de um ano específico;
+    - Coluna de percentual de distribuição de cada sabor em relação às vendas totais
+
+*/
+SELECT
+    consulta_relatorio.sabor,
+    consulta_relatorio.ano,
+    consulta_relatorio.quantidade_total,
+    round((consulta_relatorio.quantidade_total / consulta_relatorio.quantidade_geral) * 100, 2) AS percentual_participacao
+FROM
+    (
+        SELECT
+            tp.sabor,
+            EXTRACT(YEAR FROM nf.data_venda) AS ano,
+            SUM(inf.quantidade)              AS quantidade_total,
+            (
+                SELECT
+                    total_ano.quantidade_geral
+                FROM
+                    (
+                        SELECT
+                            EXTRACT(YEAR FROM nf.data_venda) AS ano,
+                            SUM(inf.quantidade)              AS quantidade_geral
+                        FROM
+                                 notas_fiscais nf
+                            INNER JOIN itens_notas_fiscais inf ON nf.numero = inf.numero
+                        WHERE
+                            EXTRACT(YEAR FROM nf.data_venda) = 2016
+                        GROUP BY
+                            EXTRACT(YEAR FROM nf.data_venda)
+                    ) total_ano
+            )                                AS quantidade_geral
+        FROM
+                 tabela_de_produtos tp
+            INNER JOIN itens_notas_fiscais inf ON tp.codigo_do_produto = inf.codigo_do_produto
+            INNER JOIN notas_fiscais       nf ON inf.numero = nf.numero
+        WHERE
+            EXTRACT(YEAR FROM nf.data_venda) = 2016
+        GROUP BY
+            tp.sabor,
+            EXTRACT(YEAR FROM nf.data_venda)
+        ORDER BY
+            SUM(inf.quantidade) DESC
+    ) consulta_relatorio;
+--  -----------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
